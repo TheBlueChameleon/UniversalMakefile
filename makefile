@@ -11,16 +11,7 @@ CXX      = gcc
 CXXFLAGS = -std=c11 -Wextra -Wall -Wpedantic -Wimplicit-fallthrough -I $(LIBDIR)
 LDFLAGS  = -lm
 
-GIT_BASE = https://github.com/TheBlueChameleon
-GIT_ADDITIONAL = "./makefile"
-	# ./tex/*.tex ./makefile
-	# ... list files here that you want to be part of the repository that are not already part of the compilable stuff
-	# separate them by whitespaces
-	# toggle to comment if you don't have any additional files to be added.
-GIT_EXCLUDE = ./src ./inc
-	# ... list files here that you do not want to be part of the repository
-	# separate by whitespaces
-	# toggle to comment if you don't want to exclude any files
+
 
 DIRECTORIES = $(subst $(SRCDIR),$(OBJDIR),$(shell find $(SRCDIR) -type d))
 	# pathes for files to be included into the compile/link procedure.
@@ -36,6 +27,17 @@ INC     = $(wildcard $(INCDIR)/*$(EXTENSION_HEADER)) $(wildcard $(INCDIR)/**/*$(
 OBJ     = $(SRC:$(SRCDIR)/%$(EXTENSION_CODE)=$(OBJDIR)/%.o)
 	# defines analogy relation?
 
+GIT_BASE = https://github.com
+GIT_USERNAME = TheBlueChameleon
+GIT_ADDITIONAL = "./makefile"
+	# ./tex/*.tex ./makefile
+	# ... list files here that you want to be part of the repository that are not already part of the compilable stuff
+	# separate them by whitespaces
+	# toggle to comment if you don't have any additional files to be added.
+GIT_EXCLUDE = ./src ./inc
+	# ... list files here that you do not want to be part of the repository
+	# separate by whitespaces
+	# toggle to comment if you don't want to exclude any files
 # =========================================================================== #
 
 COLOR_END	= \033[m
@@ -245,17 +247,19 @@ gitinit :
 	@echo "Note that this assumes there exists a repository named"
 	@echo "   $(COLOR_CYAN)$(EXENAME)$(COLOR_END)"
 	@echo "under the adress"
-	@printf "$(COLOR_CYAN)"
-	@echo "   $(COLOR_CYAN)$(GIT_BASE)$(COLOR_END)"
+	@echo "   $(COLOR_CYAN)$(GIT_BASE)/$(GIT_USERNAME)$(COLOR_END)"
 	@echo ""
 	
 	@git init
-	@git remote add origin $(GIT_BASE)/$(EXENAME).git
+	@git remote add origin $(GIT_BASE)/$(GIT_USERNAME)/$(EXENAME).git
 	
 # --------------------------------------------------------------------------- #
 gitadds :
 	@git add ./$(SRCDIR)
 	@git add ./$(INCDIR)
+	
+	@git config credential.helper store
+	@git config --global credential.helper 'cache --timeout 7200'
 	
 	@if [ -n "$(GIT_ADDITIONAL)" ]; then git add $(GIT_ADDITIONAL); fi           # -n: true if string length is nonzero 
 	@echo here
