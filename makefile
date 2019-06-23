@@ -9,6 +9,12 @@ CXX      = gcc
 CXXFLAGS = -std=c11 -Wextra -Wall -Wpedantic -Wimplicit-fallthrough -I $(LIBDIR)
 LDFLAGS  = -lm
 
+LIBDIR = lib
+SRCDIR = src
+INCDIR = inc
+OBJDIR = obj
+EXEDIR = .
+
 # --------------------------------------------------------------------------- #
 # Project Data setup
 
@@ -22,24 +28,19 @@ EXENAME = UniversalMakefile
 
 GIT_BASE = https://github.com
 GIT_USERNAME = TheBlueChameleon
+GIT_REPOSITORY = $(EXENAME)
 GIT_ADDITIONAL = "./makefile"
 	# ./tex/*.tex ./makefile
 	# ... list files here that you want to be part of the repository that are not already part of the compilable stuff
 	# separate them by whitespaces
 	# toggle to comment if you don't have any additional files to be added.
-GIT_EXCLUDE = ./src ./inc
+GIT_EXCLUDE = ./$(SRCDIR) ./$(INCDIR)
 	# ... list files here that you do not want to be part of the repository
 	# separate by whitespaces
 	# toggle to comment if you don't want to exclude any files
 
 # =========================================================================== #
 # Path Setup. Be sure that you really understand what you're doint if you edit anything below this line
-
-LIBDIR = lib
-SRCDIR = src
-INCDIR = inc
-OBJDIR = obj
-EXEDIR = .
 
 DIRECTORIES = $(subst $(SRCDIR),$(OBJDIR),$(shell find $(SRCDIR) -type d))
 	# pathes for files to be included into the compile/link procedure.
@@ -252,16 +253,16 @@ clean:
 
 gitinit :
 	@clear
-	$(call fatbox, "Setting up GIT repository with name \"$(EXENAME)\"")
+	$(call fatbox, "Setting up GIT repository with name \"$(GIT_REPOSITORY)\"")
 	@echo ""
 	@echo "Note that this assumes there exists a repository named"
-	@echo "   $(COLOR_CYAN)$(EXENAME)$(COLOR_END)"
+	@echo "   $(COLOR_CYAN)$(GIT_REPOSITORY)$(COLOR_END)"
 	@echo "under the adress"
 	@echo "   $(COLOR_CYAN)$(GIT_BASE)/$(GIT_USERNAME)$(COLOR_END)"
 	@echo ""
 	
 	@git init
-	@git remote add origin $(GIT_BASE)/$(GIT_USERNAME)/$(EXENAME).git
+	@git remote add origin $(GIT_BASE)/$(GIT_USERNAME)/$(GIT_REPOSITORY).git
 	
 # ........................................................................... #
 gitadds :
@@ -272,7 +273,6 @@ gitadds :
 	@git config --global credential.helper 'cache --timeout 7200'
 	
 	@if [ -n "$(GIT_ADDITIONAL)" ]; then git add $(GIT_ADDITIONAL); fi           # -n: true if string length is nonzero 
-	@echo here
 	@if [ -n "$(GIT_EXCLUDE)" ]; then git rm -r --cached $(GIT_EXCLUDE); fi
 	
 	@echo ""
@@ -313,20 +313,34 @@ vars :
 	@clear
 	$(call fatbox, "variables dump:")
 	
-	@echo "SRCDIR          : $(SRCDIR)"
-	@echo "INCDIR          : $(INCDIR)"
-	@echo "OBJDIR          : $(OBJDIR)"
-	@echo "EXEDIR          : $(EXEDIR)"
+	@echo "source code extension    : $(EXTENSION_CODE)"
+	@echo "header files extension   : $(EXTENSION_HEADER)"
 	@echo ""
-	@echo "DIRECTORIES     : $(DIRECTORIES)"
+	
+	@echo "executable file name     : $(EXENAME)"
 	@echo ""
-	@echo "EXTENSION_CODE  :" $(EXTENSION_CODE)
-	@echo "EXTENSION_HEADER:" $(EXTENSION_HEADER)
+	@echo "source code  directory   : $(SRCDIR)"
+	@echo "include file directory   : $(INCDIR)"
+	@echo "object file  directory   : $(OBJDIR)"
+	@echo "binary       directory   : $(EXEDIR)"
 	@echo ""
-	@echo "EXENAME         : $(EXENAME)"
-	@echo "SRC             : $(SRC)"
-	@echo "INC             : $(INC)"
-	@echo "OBJ             : $(OBJ)"
+	
+	@echo "binary source directories: $(DIRECTORIES)"
+	@echo "source code files        :"
+	@echo "   $(SRC)"
+	@echo "header files             :"
+	@echo "   $(INC)"
+	@echo "object code files        :"
+	@echo "   $(OBJ)"
+	@echo ""
+	
+	@echo "GIT host      : $(GIT_BASE)"
+	@echo "GIT username  : $(GIT_USERNAME)"
+	@echo "GIT repository: $(GIT_REPOSITORY)"
+	@echo "additional files to be added:"
+	@echo "   $(GIT_ADDITIONAL)"
+	@echo "files to be excluded        :"
+	@echo "   $(GIT_EXCLUDE)"
 	
 	$(call fatbox, "done.")
 # ........................................................................... #
@@ -363,5 +377,4 @@ help :
 	
 	@echo "Note that you can create compound targets such as:"
 	@echo "   $(COLOR_LCYAN)make clean run$(COLOR_END)"
-	
 	
