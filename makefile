@@ -1,31 +1,24 @@
-LIBDIR = lib
-SRCDIR = src
-INCDIR = inc
-OBJDIR = obj
-EXEDIR = .
+# =========================================================================== #
+# user variables setup.
+# feel free to adjust to your requirements
 
-EXTENSION_CODE   = .c
-EXTENSION_HEADER = .h
+# --------------------------------------------------------------------------- #
+# Compiler setup
 
 CXX      = gcc
 CXXFLAGS = -std=c11 -Wextra -Wall -Wpedantic -Wimplicit-fallthrough -I $(LIBDIR)
 LDFLAGS  = -lm
 
+# --------------------------------------------------------------------------- #
+# Project Data setup
 
-
-DIRECTORIES = $(subst $(SRCDIR),$(OBJDIR),$(shell find $(SRCDIR) -type d))
-	# pathes for files to be included into the compile/link procedure.
-	# subst: "substitute PARAMETER_1 by PARAMETER_2 in PARAMETER_3.
-	# shell find -type d lists only directories. find works recursively.
-	# => load from SRCDIR and OBJDIR with all subdirectories
+EXTENSION_CODE   = .c
+EXTENSION_HEADER = .h
 
 EXENAME = UniversalMakefile
-SRC     = $(wildcard $(SRCDIR)/*$(EXTENSION_CODE)) $(wildcard $(SRCDIR)/**/*$(EXTENSION_CODE))
-	# list of all files in src, including subdirectories
-INC     = $(wildcard $(INCDIR)/*$(EXTENSION_HEADER)) $(wildcard $(INCDIR)/**/*$(EXTENSION_HEADER))
-	# same for includes
-OBJ     = $(SRC:$(SRCDIR)/%$(EXTENSION_CODE)=$(OBJDIR)/%.o)
-	# defines analogy relation?
+
+# --------------------------------------------------------------------------- #
+# GIT setup
 
 GIT_BASE = https://github.com
 GIT_USERNAME = TheBlueChameleon
@@ -38,7 +31,31 @@ GIT_EXCLUDE = ./src ./inc
 	# ... list files here that you do not want to be part of the repository
 	# separate by whitespaces
 	# toggle to comment if you don't want to exclude any files
+
 # =========================================================================== #
+# Path Setup. Be sure that you really understand what you're doint if you edit anything below this line
+
+LIBDIR = lib
+SRCDIR = src
+INCDIR = inc
+OBJDIR = obj
+EXEDIR = .
+
+DIRECTORIES = $(subst $(SRCDIR),$(OBJDIR),$(shell find $(SRCDIR) -type d))
+	# pathes for files to be included into the compile/link procedure.
+	# subst: "substitute PARAMETER_1 by PARAMETER_2 in PARAMETER_3.
+	# shell find -type d lists only directories. find works recursively.
+	# => load from SRCDIR and OBJDIR with all subdirectories
+
+SRC     = $(wildcard $(SRCDIR)/*$(EXTENSION_CODE)) $(wildcard $(SRCDIR)/**/*$(EXTENSION_CODE))
+	# list of all files in src, including subdirectories
+INC     = $(wildcard $(INCDIR)/*$(EXTENSION_HEADER)) $(wildcard $(INCDIR)/**/*$(EXTENSION_HEADER))
+	# same for includes
+OBJ     = $(SRC:$(SRCDIR)/%$(EXTENSION_CODE)=$(OBJDIR)/%.o)
+	# defines analogy relation?
+
+# --------------------------------------------------------------------------- #
+# Colour constants
 
 COLOR_END	= \033[m
 
@@ -63,6 +80,7 @@ MSG_WARNING	= $(COLOR_LYELLOW)[WARNING]$(COLOR_END)
 MSG_ERROR	= $(COLOR_LRED)[ERROR]$(COLOR_END)
 
 # =========================================================================== #
+# procs
 
 define fatboxtop
 	@printf "$(COLOR_BLUE)"
@@ -122,16 +140,22 @@ define box
 endef
 
 # =========================================================================== #
+# targets
 
 .PHONY: intro all 
 
 # --------------------------------------------------------------------------- #
+# compound targets
+
 all:   intro generate extro
 new:   clean intro generate extro
 run:   intro generate extro execute
 grind: intro generate extro valgrind
 gitstart: gitinit gitadds gitsetmasterhint
+
 # --------------------------------------------------------------------------- #
+# visual feedback
+
 intro:
 	@clear
 	$(call fatbox, "attempting to make")
@@ -146,11 +170,13 @@ extro:
 	@date
 	@echo ""
 	
+	
 # --------------------------------------------------------------------------- #
+# create executable file
+
 generate: $(EXENAME)
 # ........................................................................... #
-# compile
-$(OBJDIR)/%.o: $(SRCDIR)/%$(EXTENSION_CODE)
+$(OBJDIR)/%.o: $(SRCDIR)/%$(EXTENSION_CODE)                         # compile #
 	$(call boxtop)
 	$(call boxtext, "attempting to compile...")
 	
@@ -170,8 +196,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%$(EXTENSION_CODE)
 	$(call boxbottom)
 	
 # ........................................................................... #
-# link
-$(EXENAME): $(OBJ)
+$(EXENAME): $(OBJ)                                                     # link #
 	$(call boxtop)
 	$(call boxtext, "attempting to link...")
 	
@@ -198,14 +223,18 @@ $(EXENAME): $(OBJ)
 	$(call boxbottom)
 	
 # --------------------------------------------------------------------------- #
+# run variations
+
 execute:
 	@./$(EXEDIR)/$(EXENAME)
 	
-# --------------------------------------------------------------------------- #
+# ........................................................................... #
 valgrind :
 	@valgrind ./$(EXEDIR)/$(EXENAME)
 	
 # --------------------------------------------------------------------------- #
+# delete the object directory
+
 clean:
 	@printf "$(COLOR_LCYAN)"
 	@echo "#=============================================================================#"
@@ -219,27 +248,8 @@ clean:
 	@echo ""
 	
 # --------------------------------------------------------------------------- #
-vars :
-	@clear
-	$(call fatbox, "variables dump:")
-	
-	@echo "SRCDIR          : $(SRCDIR)"
-	@echo "INCDIR          : $(INCDIR)"
-	@echo "OBJDIR          : $(OBJDIR)"
-	@echo "EXEDIR          : $(EXEDIR)"
-	@echo ""
-	@echo "DIRECTORIES     : $(DIRECTORIES)"
-	@echo ""
-	@echo "EXTENSION_CODE  :" $(EXTENSION_CODE)
-	@echo "EXTENSION_HEADER:" $(EXTENSION_HEADER)
-	@echo ""
-	@echo "EXENAME         : $(EXENAME)"
-	@echo "SRC             : $(SRC)"
-	@echo "INC             : $(INC)"
-	@echo "OBJ             : $(OBJ)"
-	
-	$(call fatbox, "done.")
-# --------------------------------------------------------------------------- #
+# git versioning support
+
 gitinit :
 	@clear
 	$(call fatbox, "Setting up GIT repository with name \"$(EXENAME)\"")
@@ -253,7 +263,7 @@ gitinit :
 	@git init
 	@git remote add origin $(GIT_BASE)/$(GIT_USERNAME)/$(EXENAME).git
 	
-# --------------------------------------------------------------------------- #
+# ........................................................................... #
 gitadds :
 	@git add ./$(SRCDIR)
 	@git add ./$(INCDIR)
@@ -274,7 +284,7 @@ gitadds :
 	@echo "to upload the current status"
 	@echo ""
 	
-# --------------------------------------------------------------------------- #
+# ........................................................................... #
 gitremove :
 	@printf "$(COLOR_LCYAN)"
 	@echo "#=============================================================================#"
@@ -286,33 +296,71 @@ gitremove :
 	@echo "# done.                                                                       #"
 	@echo "#=============================================================================#"
 	@echo ""
-# --------------------------------------------------------------------------- #
+# ........................................................................... #
 gitsetmasterhint :
 	@echo "type"
 	@echo "   $(COLOR_CYAN)make gitsetmaster$(COLOR_END)"
 	@echo "to finalize the process after adjusting the staging area."
 	@echo ""
-# --------------------------------------------------------------------------- #
+# ........................................................................... #
 gitsetmaster :
 	@git commit -m "initial commit"
 	@git push --set-upstream origin master
 # --------------------------------------------------------------------------- #
+# help section
+
+vars :
+	@clear
+	$(call fatbox, "variables dump:")
+	
+	@echo "SRCDIR          : $(SRCDIR)"
+	@echo "INCDIR          : $(INCDIR)"
+	@echo "OBJDIR          : $(OBJDIR)"
+	@echo "EXEDIR          : $(EXEDIR)"
+	@echo ""
+	@echo "DIRECTORIES     : $(DIRECTORIES)"
+	@echo ""
+	@echo "EXTENSION_CODE  :" $(EXTENSION_CODE)
+	@echo "EXTENSION_HEADER:" $(EXTENSION_HEADER)
+	@echo ""
+	@echo "EXENAME         : $(EXENAME)"
+	@echo "SRC             : $(SRC)"
+	@echo "INC             : $(INC)"
+	@echo "OBJ             : $(OBJ)"
+	
+	$(call fatbox, "done.")
+# ........................................................................... #
 help :
 	@echo "This makefile supports the following targets:"
-	@echo "$(COLOR_LCYAN)clean:$(COLOR_END)"
+	@echo "$(COLOR_YELLOW)Compile targets$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)clean$(COLOR_END)"
 	@echo "   removes $(OBJDIR) and its contents."
-	@echo "$(COLOR_LCYAN)generate:$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)all$(COLOR_END)"
 	@echo "   compiles any files that may have changed since the last time this was run"
-	@echo "$(COLOR_LCYAN)run:$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)new$(COLOR_END)"
+	@echo "   compiles all files, regardless of whether they may have changed since the last time this was run"
+	@echo "* $(COLOR_LCYAN)run$(COLOR_END)"
 	@echo "   compiles all files and runs the program thereafter"
-	@echo "$(COLOR_LCYAN)grind:$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)grind$(COLOR_END)"
 	@echo "   compiles all files and runs the program via valgrind"
 	@echo ""
-	@echo "$(COLOR_LCYAN)gitstart:$(COLOR_END)"
+	@echo "$(COLOR_YELLOW)GIT targets$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)gitstart$(COLOR_END)"
 	@echo "   sets up the working directory for git and prepares an initial commit"
-	@echo "$(COLOR_LCYAN)gitsetmaster:$(COLOR_END)"
-	@echo "   sets the master branch and pushes the initial commit. Run only once"
-	@echo "$(COLOR_LCYAN)gitadds:$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)gitsetmaster$(COLOR_END)"
+	@echo "   sets the master branch and pushes the initial commit. $(COLOR_LRED)Run only once$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)gitadds$(COLOR_END)"
 	@echo "   adds files to the staging area."
-	@echo "$(COLOR_LCYAN)gitremove:$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)gitremove$(COLOR_END)"
 	@echo "   removes all local data of the versioning system"
+	@echo ""
+	@echo "$(COLOR_YELLOW)Info targets$(COLOR_END)"
+	@echo "* $(COLOR_LCYAN)vars$(COLOR_END)"
+	@echo "   show variables generated and set by this script"
+	@echo "* $(COLOR_LCYAN)help$(COLOR_END)"
+	@echo "   show this help"
+	@echo ""
+	
+	@echo "Note that you can create compound targets such as:"
+	@echo "   $(COLOR_LCYAN)make clean run$(COLOR_END)"
+	
