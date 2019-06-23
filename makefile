@@ -16,7 +16,11 @@ GIT_ADDITIONAL = "./makefile"
 	# ./tex/*.tex ./makefile
 	# ... list files here that you want to be part of the repository that are not already part of the compilable stuff
 	# separate them by whitespaces
-	# uncomment if you don't have any additional files to be added.
+	# toggle to comment if you don't have any additional files to be added.
+GIT_EXCLUDE = ./src ./inc
+	# ... list files here that you do not want to be part of the repository
+	# separate by whitespaces
+	# toggle to comment if you don't want to exclude any files
 
 DIRECTORIES = $(subst $(SRCDIR),$(OBJDIR),$(shell find $(SRCDIR) -type d))
 	# pathes for files to be included into the compile/link procedure.
@@ -253,7 +257,9 @@ gitadds :
 	@git add ./$(SRCDIR)
 	@git add ./$(INCDIR)
 	
-	@if [ -n "$(GIT_ADDITIONAL)" ]; then git add $(GIT_ADDITIONAL); fi   # -n: true if string length is nonzero 
+	@if [ -n "$(GIT_ADDITIONAL)" ]; then git add $(GIT_ADDITIONAL); fi           # -n: true if string length is nonzero 
+	@echo here
+	@if [ -n "$(GIT_EXCLUDE)" ]; then git rm -r --cached $(GIT_EXCLUDE); fi
 	
 	@echo ""
 	@git status
@@ -297,7 +303,12 @@ help :
 	@echo "   compiles all files and runs the program thereafter"
 	@echo "$(COLOR_LCYAN)grind:$(COLOR_END)"
 	@echo "   compiles all files and runs the program via valgrind"
+	@echo ""
 	@echo "$(COLOR_LCYAN)gitstart:$(COLOR_END)"
-	@echo "   sets up the working directory for git and pushes an initial commit"
+	@echo "   sets up the working directory for git and prepares an initial commit"
+	@echo "$(COLOR_LCYAN)gitsetmaster:$(COLOR_END)"
+	@echo "   sets the master branch and pushes the initial commit. Run only once"
 	@echo "$(COLOR_LCYAN)gitadds:$(COLOR_END)"
-	@echo "   sets up the working directory for git and pushes an initial commit"
+	@echo "   adds files to the staging area."
+	@echo "$(COLOR_LCYAN)gitremove:$(COLOR_END)"
+	@echo "   removes all local data of the versioning system"
