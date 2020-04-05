@@ -5,9 +5,9 @@
 # --------------------------------------------------------------------------- #
 # Compiler setup
 
-CXX      = gcc
-CXXFLAGS = -std=c11 -Wextra -Wall -Wpedantic -Wimplicit-fallthrough -I $(LIBDIR)
-LDFLAGS  = -lm
+CXX      = g++
+CXXFLAGS = -std=c++17 -O2 -Wextra -Wall -Wpedantic -Wimplicit-fallthrough -I $(LIBDIR)
+LDFLAGS  = -lm -lstdc++fs
 
 LIBDIR = lib
 SRCDIR = src
@@ -18,10 +18,15 @@ EXEDIR = .
 # --------------------------------------------------------------------------- #
 # Project Data setup
 
-EXTENSION_CODE   = .c
-EXTENSION_HEADER = .h
+EXTENSION_CODE   = .cpp
+EXTENSION_HEADER = .hpp
 
-EXENAME = UniversalMakefile
+EXENAME = Template_CPP_Project
+
+# --------------------------------------------------------------------------- #
+# Runtime setup
+
+RUNTIME_PARAM = "./input/*Phaselist.txt"
 
 # --------------------------------------------------------------------------- #
 # GIT setup
@@ -34,7 +39,8 @@ GIT_ADDITIONAL = "./makefile"
 	# ... list files here that you want to be part of the repository that are not already part of the compilable stuff
 	# separate them by whitespaces
 	# toggle to comment if you don't have any additional files to be added.
-GIT_EXCLUDE = ./$(SRCDIR) ./$(INCDIR)
+#GIT_EXCLUDE = 
+	#./$(SRCDIR) ./$(INCDIR)
 	# ... list files here that you do not want to be part of the repository
 	# separate by whitespaces
 	# toggle to comment if you don't want to exclude any files
@@ -152,7 +158,7 @@ all:   intro generate extro
 new:   clean intro generate extro
 run:   intro generate extro execute
 grind: intro generate extro valgrind
-gitstart: gitinit gitadds gitsetmasterhint
+gitstart: gitinit gitadds gitsetmaster
 
 # --------------------------------------------------------------------------- #
 # visual feedback
@@ -186,12 +192,11 @@ $(OBJDIR)/%.o: $(SRCDIR)/%$(EXTENSION_CODE)                         # compile #
 	@printf "$(COLOR_BLUE)"
 	@printf "| "
 	@printf "$(COLOR_LBLUE)"
-	@printf "%-75b %s" "  Compiling:  $(COLOR_LYELLOW)$<$(COLOR_END)"
-	
-	@-$(CXX) $(CXXFLAGS) -c $< -o $@ -I $(INCDIR)
-
-	@printf "%-20b" "$(MSG_OK)"
+	@printf "%-85b %s" "  Compiling:  $(COLOR_LYELLOW)$<$(COLOR_END)"
 	@printf "$(COLOR_BLUE)|\n"
+	
+	@$(CXX) $(CXXFLAGS) -c $< -o $@ -I $(INCDIR) \
+		|| (echo "$(MSG_ERROR)"; exit 1)
 	
 	$(call boxtext, "done.")
 	$(call boxbottom)
@@ -227,7 +232,7 @@ $(EXENAME): $(OBJ)                                                     # link #
 # run variations
 
 execute:
-	@./$(EXEDIR)/$(EXENAME)
+	@./$(EXEDIR)/$(EXENAME) $(RUNTIME_PARAM)
 	
 # ........................................................................... #
 valgrind :
@@ -297,12 +302,6 @@ gitremove :
 	@echo "#=============================================================================#"
 	@echo ""
 # ........................................................................... #
-gitsetmasterhint :
-	@echo "type"
-	@echo "   $(COLOR_CYAN)make gitsetmaster$(COLOR_END)"
-	@echo "to finalize the process after adjusting the staging area."
-	@echo ""
-# ........................................................................... #
 gitsetmaster :
 	@git commit -m "initial commit"
 	@git push --set-upstream origin master
@@ -360,9 +359,7 @@ help :
 	@echo ""
 	@echo "$(COLOR_YELLOW)GIT targets$(COLOR_END)"
 	@echo "* $(COLOR_LCYAN)gitstart$(COLOR_END)"
-	@echo "   sets up the working directory for git and prepares an initial commit"
-	@echo "* $(COLOR_LCYAN)gitsetmaster$(COLOR_END)"
-	@echo "   sets the master branch and pushes the initial commit. $(COLOR_LRED)Run only once$(COLOR_END)"
+	@echo "   sets up the working directory for git and prepares an initial commit. $(COLOR_LRED)Run only once$(COLOR_END)"
 	@echo "* $(COLOR_LCYAN)gitadds$(COLOR_END)"
 	@echo "   adds files to the staging area."
 	@echo "* $(COLOR_LCYAN)gitremove$(COLOR_END)"
@@ -376,5 +373,4 @@ help :
 	@echo ""
 	
 	@echo "Note that you can create compound targets such as:"
-	@echo "   $(COLOR_LCYAN)make clean run$(COLOR_END)"
-	
+	@echo "   $(COLOR_LCYAN)make clean run$(COLOR_END)" 
